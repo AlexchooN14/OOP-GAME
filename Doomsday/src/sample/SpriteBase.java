@@ -8,6 +8,7 @@ import map.Cell;
 
 
 public abstract class SpriteBase extends Pane {
+    String type;
 
     Image image;
     ImageView imageView;
@@ -35,7 +36,7 @@ public abstract class SpriteBase extends Pane {
     HealthBars healthBar;
 
 
-    public SpriteBase(Pane layer, Image image, double x, double y, double dx, double dy, double health, double damage) {
+    public SpriteBase(Pane layer, Image image, double x, double y, double dx, double dy, double health, double damage, String type) {
 
         this.layer = layer;
         //System.out.println(image);
@@ -56,8 +57,8 @@ public abstract class SpriteBase extends Pane {
 
         this.imageView = new ImageView(image);
         this.imageView.relocate(rectangle.getX(), rectangle.getY());
-
-        healthBar = new HealthBars(layer,maxHealth,health,x,rectangle.getY()-10);
+        if (!(type == "APPLE"))
+            healthBar = new HealthBars(layer,maxHealth,health,x,rectangle.getY()-10);
 
         addToLayer();
 
@@ -70,6 +71,7 @@ public abstract class SpriteBase extends Pane {
 
     public void removeFromLayer() {
         this.layer.getChildren().remove(this.imageView);
+        //if (type == "APPLE") Apple.apples_count--;
     }
 
     public Pane getLayer() {
@@ -156,9 +158,10 @@ public abstract class SpriteBase extends Pane {
     }
 
     public void updateUI() {
-        healthBar.UpdateUI(health, maxHealth);
-        healthBar.imageView.relocate(rectangle.getX(),rectangle.getY()-20);
-
+        if (!(type == "APPLE")) {
+            healthBar.UpdateUI(health, maxHealth);
+            healthBar.imageView.relocate(rectangle.getX(), rectangle.getY() - 20);
+        }
         imageView.relocate(rectangle.getX(), rectangle.getY());
 
     }

@@ -49,7 +49,7 @@ public class Main extends Application {
     Grid map;
 
     int[][] gameMap ={
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//araylist elemanları sütunsal olarak sayıyor obstacle hareketinde farkedersiniz 48.eleman bi border
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
             {0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0},
             {0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0},
             {0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0},
@@ -63,7 +63,7 @@ public class Main extends Application {
             {0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0},
             {0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0},
             {0,0,1,0,0,1,0,0,0,1,0,0,0,1,0,0,1,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//hareketsiz elemalar için bunun daha uygun olduğunu düşündüm
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     };
 
     //Creating lists
@@ -79,7 +79,7 @@ public class Main extends Application {
 
     Text collisionText = new Text();
     boolean player_EnemyCollision = false;
-    boolean player_AppleCollision = false;
+    List<Boolean> player_AppleCollision = new ArrayList<Boolean>();
     boolean player_MapObstacleCollision=false;
     boolean attackCollision = false;
 
@@ -102,7 +102,7 @@ public class Main extends Application {
 
 
         scene = new Scene(root, Settings.SCENE_WIDTH, Settings.SCENE_HEIGHT);
-        primaryStage.setTitle("Room & Doom");
+        primaryStage.setTitle("Doomsday");
         primaryStage.setScene(scene);
         primaryStage.show();
 
@@ -130,8 +130,10 @@ public class Main extends Application {
 
                 //input
                 players.forEach(sprite -> sprite.processInput());
-                if (enemies.isEmpty())
-                    treasures.forEach(sprite -> treasure.processInput());
+                if (enemies.isEmpty()) {
+                    if (player.collected_apples == Apple.getApples_count())
+                        treasures.forEach(sprite -> treasure.processInput());
+                }
                 // movement
                 players.forEach(sprite -> sprite.move());
                 //System.out.println(enemies.isEmpty());
@@ -144,18 +146,26 @@ public class Main extends Application {
                 player_CheckCollisionWithMapObstacle();
                 player_mapObstacleBlock();
 
+                if (spawned) {
+                    player_CheckCollisionWithApple();
+                    player_AppleBlock();
+                }
 
                 checkAttackCollisionWithEnemy();
 
                 // update sprites in scene
                 players.forEach(sprite -> sprite.updateUI());
                 enemies.forEach(sprite -> sprite.updateUI());
+                if (spawned)
+                    apples.forEach(sprite -> sprite.updateUI());
 
                 // check if sprite can be removed
                 enemies.forEach(sprite -> sprite.checkRemovability());
 
                 // remove removables from list, layer, etc
                 removeSprites(enemies);
+                if (spawned)
+                    removeApples(apples);
                 // update score, health, etc
                 updateScore();
             }
@@ -169,9 +179,9 @@ public class Main extends Application {
     //Image resources
     private void loadGame() {
         playerImage = new Image(getClass().getResource("/spritesheet.png").toExternalForm());
-        enemyImage = new Image(getClass().getResource("/dle_2.jpg").toExternalForm());
+        enemyImage = new Image(getClass().getResource("/dle_2.png").toExternalForm());
        // bulletImage = new Image(getClass().getResource("/plasmaball.png").toExternalForm());
-        AppleImage = new Image(getClass().getResource("/apple_new.jpg").toExternalForm());
+        AppleImage = new Image(getClass().getResource("/apple_new.png").toExternalForm());
         borderImage = new Image(getClass().getResource("/border.jpg").toExternalForm());
         treasureImage = new Image(getClass().getResource("/treasure.png").toExternalForm());
         treasureOpenedImage = new Image(getClass().getResource("/treasureOpened.png").toExternalForm());
@@ -190,8 +200,10 @@ public class Main extends Application {
         }
     }
     public void player_AppleBlock(){
-        if(player_AppleCollision){
-            getAfterCollision();
+        for (Apple current : apples) {
+            if(player_AppleCollision.get(apples.indexOf(current))){
+                getAfterCollision();
+            }
         }
     }
 
@@ -209,20 +221,16 @@ public class Main extends Application {
 
         Image image = playerImage;
         //Setting players' qualities
-        player = new Player(playfieldLayout, image, 100, 10, 0.5, input);
+        player = new Player(playfieldLayout, image, 100, 10, 4, input);
         //Add all players in a list so it will be easier to work
         players.add(player);
 
     }
 
-    //Creating an enemy here
-    private void createEnemy() {
-        Image image = enemyImage;
-        //Setting enemies' qualities
-        enemy = new Enemy(playfieldLayout, image, 300, 300, 100, 10);
-        //Add all enemies in a list so it will be easier to work
-        enemies.add(enemy);
 
+    private void createEnemy() {
+        enemy = new Enemy(playfieldLayout, enemyImage, 300, 300, 100, 10);
+        enemies.add(enemy);
     }
 
 
@@ -239,19 +247,18 @@ public class Main extends Application {
 
         treasures.add(treasure);
     }
-    private void createApples(){
-        //For inputs
-        input = new Input(scene);
-        input.addListeners();
 
-        Image image = AppleImage;
-
-        apple = new Apple(playfieldLayout, image, input, 200, 600);
-        apple1 = new Apple(playfieldLayout, image, input, 700, 500);
-        apple2 = new Apple(playfieldLayout, image, input, 750, 200);
+    private void createApples() {
+        apple = new Apple(playfieldLayout, AppleImage,200, 600);
+        apple1 = new Apple(playfieldLayout, AppleImage, 700, 500);
+        apple2 = new Apple(playfieldLayout, AppleImage, 750, 200);
         apples.add(apple);
         apples.add(apple1);
         apples.add(apple2);
+
+        for (int i = 0; i < Apple.getApples_count(); i++) {
+            player_AppleCollision.add(false);
+        }
     }
 
 
@@ -272,6 +279,24 @@ public class Main extends Application {
         }
     }
 
+    private void removeApples(List<Apple> apples) {
+        Iterator<? extends Apple> iterator = apples.iterator();
+        while (iterator.hasNext()) {
+            Apple current = iterator.next();
+
+            if (current.isRemovable()) {
+
+                // remove from layer
+                current.removeFromLayer();
+                //Apple.apples_count--;
+                //current.layer.getChildren().remove(current.imageView);  // Does nothing when uncommented
+
+                // remove from list
+                iterator.remove();
+            }
+        }
+    }
+
     private void player_CheckCollisionWithEnemy() {
         player_EnemyCollision = false;
 
@@ -284,12 +309,13 @@ public class Main extends Application {
         }
     }
     private void player_CheckCollisionWithApple() {
-        player_AppleCollision = false;
-
         for (Player player : players) {
             for (Apple apple : apples) {
-                if (player.collidesWith(enemy)) {
-                    player_AppleCollision = true;
+                if (player.collidesWith(apple)) {
+                    System.out.println("collision apple");  // TODO remove after
+                    player.collected_apples++;
+                    player_AppleCollision.set(apples.indexOf(apple), true);
+                    apple.setRemovable(true);
                 }
             }
         }
@@ -336,6 +362,10 @@ public class Main extends Application {
         player.rectangle.setX(player.rectangle.getX()-player.getDx());
         player.rectangle.setY(player.rectangle.getY()-player.getDy());
     }
+
+//    private void getAfterAppleCollision(Apple apple){
+//        apple.setRemovable(true);
+//    }
     public static void main(String[] args) {
         launch(args);
     }

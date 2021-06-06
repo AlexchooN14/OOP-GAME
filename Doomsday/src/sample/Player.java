@@ -12,6 +12,7 @@ public class Player extends SpriteBase {
     double characterMaxX;
     double characterMinY;
     double characterMaxY;
+    int collected_apples = 0;
 
     Input input;
 
@@ -21,7 +22,7 @@ public class Player extends SpriteBase {
 
     public Player(Pane layer, Image image, double health, double damage, double speed, Input input) {
 
-        super(layer, image, 200, 400, 4, 4, health, damage);
+        super(layer, image, 200, 400, 4, 4, health, damage, "PLAYER");
 
         this.speed = speed;
         this.input = input;

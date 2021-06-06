@@ -8,7 +8,7 @@ public class Enemy extends SpriteBase {
 
     //We need to set enemy's attack
     public Enemy(Pane layer, Image image, double x, double y, double health, double damage) {
-        super(layer, image, x, y, 0, 0, health, damage);
+        super(layer, image, x, y, 0, 0, health, damage, "PLAYER");
         this.imageView.setViewport(new Rectangle2D(0, 0, 64, 64));
         rectangle.setHeight(imageView.getViewport().getHeight());
         rectangle.setWidth(imageView.getViewport().getWidth());
