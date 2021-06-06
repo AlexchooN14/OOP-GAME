@@ -71,10 +71,6 @@ public class Input {
     public static void setIsAttacking(boolean isAttacking) {
         Input.isAttacking = isAttacking;
     }
-    // -------------------------------------------------
-    // Evaluate bitset of pressed keys and return the player input.
-    // If direction and its opposite direction are pressed simultaneously, then the direction isn't handled.
-    // -------------------------------------------------
 
     public boolean isMoveUp() {
         return keyboardBitSet.get(upKey.ordinal()) && !keyboardBitSet.get(downKey.ordinal());

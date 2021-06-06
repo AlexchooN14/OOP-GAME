@@ -15,8 +15,8 @@ public class Grid {
     public Grid(){
 
         mapCell = new Cell [(int) Settings.ROW_CELL_COUNT] [(int)Settings.COLUMN_CELL_COUNT];
-        for(int i=0;i<mapCell.length;i++){
-            for(int j=0;j<mapCell[i].length;j++){
+        for(int i = 0; i < mapCell.length; i++){
+            for(int j = 0; j < mapCell[i].length; j++){
                 mapCell[i][j]=new Cell(i*64,j*64,64,64,1);
             }
         }
@@ -37,29 +37,22 @@ public class Grid {
                 }
             }
         }
-
-
     }
 
     public void Draw(Pane layer){
         this.layer=layer;
 
-        for(int i=0;i<mapCell.length;i++){
-            for(int j=0;j<mapCell[i].length;j++){
+        for(int i = 0 ; i < mapCell.length; i++){
+            for(int j = 0; j < mapCell[i].length; j++){
 
                 Cell cell=mapCell[i][j];
                 mapArraylist.add(cell);
-                //mapAraylistini oluşturuyor
 
             }
         }
-        for(int i=0;i<mapArraylist.size();i++){
+        for(int i = 0; i < mapArraylist.size(); i++){
             layer.getChildren().add(mapArraylist.get(i).getRect());
         }
 
     }
-
-
-
-
 }
